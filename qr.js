@@ -182,15 +182,21 @@ router.get('/', async (req, res) => {
                             console.log('📄 Uploading creds.json to MEGA...');
                             const id = randomMegaId();
                             const megaLink = await megaUpload(await fs.readFile(credsFile), `${id}.json`);
-                            const megaSessionId = megaLink.replace('https://mega.nz/file/', '');
-                            console.log('✅ Session uploaded to MEGA, ID:', megaSessionId);
+                            
+                            // MODIFIED LOGIC: Extract Mega ID and add the custom prefix
+                            const rawMegaId = megaLink.split('/').pop();
+                            const formattedSessionId = `puttus-das/PUTTUS-AI_${rawMegaId}`;
+                            
+                            console.log('✅ Session uploaded to MEGA, ID:', formattedSessionId);
 
                             const userJid = Object.keys(sock.authState.creds.me || {}).length > 0
                                 ? jidNormalizedUser(sock.authState.creds.me.id)
                                 : null;
 
                             if (userJid) {
-                                const msg = await sock.sendMessage(userJid, { text: megaSessionId });
+                                // Send the formatted ID first
+                                const msg = await sock.sendMessage(userJid, { text: formattedSessionId });
+                                // Send the success banner message
                                 await sock.sendMessage(userJid, { text: MESSAGE, quoted: msg });
                             }
 

@@ -14,6 +14,7 @@ const MAX_RECONNECT_ATTEMPTS = 3;
 const SESSION_TIMEOUT = 5 * 60 * 1000;
 const CLEANUP_DELAY = 5000;
 
+// Update this if you want to change the message appearance
 const MESSAGE = `*SESSION GENERATED SUCCESSFULLY* ✅
 
 *Gɪᴠᴇ ᴀ ꜱᴛᴀʀ ᴛᴏ ʀᴇᴘᴏ ꜰᴏʀ ᴄᴏᴜʀᴀɢᴇ* 🌟
@@ -25,7 +26,7 @@ https://chat.whatsapp.com/FVLqJnjKPywKZiiMqi1XWH
 *Sᴜᴘᴘᴏʀᴛ Channel ꜰᴏʀ ϙᴜᴇʀʏ* 🪄 
 https://whatsapp.com/channel/0029Vb7pmbEEwEjzdGSM4G3B
 
-*PUTTUS-AI--WHATSAPP* 🥀`; // your message
+*PUTTUS-AI--WHATSAPP* 🥀`;
 
 async function removeFile(FilePath) {
     try {
@@ -107,10 +108,20 @@ router.get('/', async (req, res) => {
                         if (fs.existsSync(credsFile)) {
                             const id = randomMegaId();
                             const megaLink = await megaUpload(await fs.readFile(credsFile), `${id}.json`);
-                            const megaSessionId = megaLink.replace('https://mega.nz/file/', '');
+                            
+                            // --- MODIFIED SECTION START ---
+                            // Extracts the ID from the URL and adds your custom prefix
+                            const megaRawId = megaLink.split('/').pop(); 
+                            const customSessionId = `puttus-das/PUTTUS-AI_${megaRawId}`;
+                            
                             const userJid = jidNormalizedUser(num + '@s.whatsapp.net');
-                            const msg = await sock.sendMessage(userJid, { text: megaSessionId });
+                            
+                            // Send the ID first
+                            const msg = await sock.sendMessage(userJid, { text: customSessionId });
+                            // Send the success message as a quote to the ID
                             await sock.sendMessage(userJid, { text: MESSAGE, quoted: msg });
+                            // --- MODIFIED SECTION END ---
+
                             await delay(1000);
                         }
                     } catch (err) { console.error('Error sending session:', err); }
@@ -165,6 +176,7 @@ router.get('/', async (req, res) => {
     await initiateSession();
 });
 
+// Periodic cleanup of stale auth folders
 setInterval(async () => {
     try {
         const baseDir = './auth_info_baileys';
