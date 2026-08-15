@@ -1,930 +1,176 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-
-    <title>PUTTUS-AI • Session Portal</title>
-
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
-
-    <link
-        rel="stylesheet"
-        href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css"
-    >
-
-    <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-
-        :root {
-            --cyan: #00d9ff;
-            --blue: #008cff;
-            --light: #dff9ff;
-            --glass: rgba(7, 25, 43, 0.55);
-            --border: rgba(0, 217, 255, 0.30);
-        }
-
-        html {
-            scroll-behavior: smooth;
-        }
-
-        body {
-            min-height: 100vh;
-            overflow-x: hidden;
-
-            font-family: 'Inter', system-ui, sans-serif;
-            color: white;
-
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-
-            padding: 20px;
-
-            background:
-                radial-gradient(
-                    circle at 20% 10%,
-                    rgba(0, 180, 255, 0.18),
-                    transparent 35%
-                ),
-                radial-gradient(
-                    circle at 90% 90%,
-                    rgba(80, 0, 255, 0.14),
-                    transparent 35%
-                ),
-                linear-gradient(
-                    145deg,
-                    #020910,
-                    #041522,
-                    #02080e
-                );
-        }
-
-        /* =========================
-           BACKGROUND ORBS
-        ========================== */
-
-        .orb {
-            position: fixed;
-            width: 55vmax;
-            height: 55vmax;
-
-            border-radius: 50%;
-
-            background:
-                radial-gradient(
-                    circle,
-                    rgba(0, 210, 255, 0.20),
-                    rgba(0, 100, 255, 0.05) 55%,
-                    transparent 70%
-                );
-
-            filter: blur(80px);
-
-            pointer-events: none;
-            z-index: 0;
-
-            animation: orbFloat 20s infinite alternate ease-in-out;
-        }
-
-        .orb.one {
-            top: -25%;
-            left: -20%;
-        }
-
-        .orb.two {
-            right: -25%;
-            bottom: -25%;
-
-            background:
-                radial-gradient(
-                    circle,
-                    rgba(120, 0, 255, 0.16),
-                    rgba(0, 160, 255, 0.05) 55%,
-                    transparent 70%
-                );
-
-            animation-duration: 28s;
-        }
-
-        @keyframes orbFloat {
-            from {
-                transform: translate(0, 0) scale(1);
-            }
-
-            to {
-                transform: translate(10%, 12%) scale(1.25);
-            }
-        }
-
-        /* =========================
-           PARTICLES
-        ========================== */
-
-        #particles {
-            position: fixed;
-            inset: 0;
-
-            overflow: hidden;
-
-            pointer-events: none;
-            z-index: 1;
-        }
-
-        .particle {
-            position: absolute;
-
-            width: 3px;
-            height: 3px;
-
-            border-radius: 50%;
-
-            background: #5eeaff;
-
-            box-shadow:
-                0 0 8px #00d9ff,
-                0 0 18px rgba(0, 217, 255, .5);
-
-            animation: particleMove linear infinite;
-        }
-
-        @keyframes particleMove {
-            0% {
-                transform:
-                    translateY(105vh)
-                    translateX(0)
-                    scale(1);
-
-                opacity: 0;
-            }
-
-            15% {
-                opacity: .7;
-            }
-
-            80% {
-                opacity: .35;
-            }
-
-            100% {
-                transform:
-                    translateY(-15vh)
-                    translateX(60px)
-                    scale(.1);
-
-                opacity: 0;
-            }
-        }
-
-        /* =========================
-           MAIN CARD
-        ========================== */
-
-        .container {
-            width: 100%;
-            max-width: 760px;
-
-            position: relative;
-            z-index: 10;
-
-            margin: 30px auto;
-        }
-
-        .card {
-            position: relative;
-
-            padding: 55px 40px;
-
-            text-align: center;
-
-            border-radius: 42px;
-
-            background:
-                linear-gradient(
-                    145deg,
-                    rgba(10, 39, 64, .70),
-                    rgba(2, 17, 30, .55)
-                );
-
-            border: 1px solid var(--border);
-
-            backdrop-filter: blur(22px) saturate(150%);
-            -webkit-backdrop-filter: blur(22px) saturate(150%);
-
-            box-shadow:
-                0 30px 80px rgba(0, 0, 0, .55),
-                inset 0 0 40px rgba(0, 200, 255, .035),
-                0 0 0 1px rgba(255,255,255,.02);
-
-            transition:
-                transform .25s ease,
-                border-color .25s ease,
-                box-shadow .25s ease;
-        }
-
-        .card:hover {
-            border-color: rgba(0, 225, 255, .55);
-
-            box-shadow:
-                0 35px 90px rgba(0, 0, 0, .65),
-                0 0 45px rgba(0, 180, 255, .12);
-        }
-
-        /* =========================
-           STATUS
-        ========================== */
-
-        .status {
-            display: inline-flex;
-
-            align-items: center;
-            gap: 9px;
-
-            padding: 9px 18px;
-
-            margin-bottom: 25px;
-
-            border-radius: 50px;
-
-            background: rgba(0, 70, 90, .25);
-
-            border: 1px solid rgba(0, 210, 255, .35);
-
-            color: #d9fbff;
-
-            font-size: 13px;
-            font-weight: 500;
-
-            box-shadow:
-                0 0 20px rgba(0, 200, 255, .12);
-        }
-
-        .status-dot {
-            width: 8px;
-            height: 8px;
-
-            border-radius: 50%;
-
-            background: #2cff88;
-
-            box-shadow:
-                0 0 8px #2cff88,
-                0 0 16px rgba(44,255,136,.6);
-
-            animation: statusPulse 2s infinite;
-        }
-
-        @keyframes statusPulse {
-            0%, 100% {
-                opacity: .6;
-                transform: scale(.9);
-            }
-
-            50% {
-                opacity: 1;
-                transform: scale(1.15);
-            }
-        }
-
-        /* =========================
-           LOGO
-        ========================== */
-
-        .logo {
-            width: 90px;
-            height: 90px;
-
-            margin: 0 auto 22px;
-
-            display: flex;
-            align-items: center;
-            justify-content: center;
-
-            border-radius: 28px;
-
-            background:
-                linear-gradient(
-                    145deg,
-                    rgba(0, 217, 255, .16),
-                    rgba(0, 100, 255, .06)
-                );
-
-            border: 1px solid rgba(0, 217, 255, .35);
-
-            box-shadow:
-                0 0 30px rgba(0, 190, 255, .14),
-                inset 0 0 20px rgba(0, 190, 255, .08);
-
-            transform: rotate(-2deg);
-        }
-
-        .logo i {
-            font-size: 42px;
-
-            color: var(--cyan);
-
-            filter:
-                drop-shadow(0 0 10px rgba(0, 217, 255, .8));
-        }
-
-        /* =========================
-           TITLE
-        ========================== */
-
-        h1 {
-            font-size: clamp(3rem, 9vw, 5rem);
-
-            line-height: 1;
-
-            font-weight: 800;
-
-            letter-spacing: -3px;
-
-            margin-bottom: 15px;
-
-            background:
-                linear-gradient(
-                    120deg,
-                    #ffffff,
-                    #9cecff,
-                    #38cfff,
-                    #ffffff
-                );
-
-            background-size: 250% auto;
-
-            -webkit-background-clip: text;
-            background-clip: text;
-
-            color: transparent;
-
-            animation: titleGlow 5s linear infinite;
-
-            filter:
-                drop-shadow(0 0 18px rgba(0, 190, 255, .35));
-        }
-
-        @keyframes titleGlow {
-            to {
-                background-position: 250% center;
-            }
-        }
-
-        .subtitle {
-            display: inline-flex;
-
-            align-items: center;
-            gap: 8px;
-
-            color: #a9eaff;
-
-            font-size: 16px;
-            font-weight: 400;
-
-            padding-bottom: 15px;
-
-            border-bottom:
-                1px dashed rgba(90, 210, 255, .4);
-
-            margin-bottom: 28px;
-        }
-
-        .subtitle i {
-            color: #49ddff;
-
-            filter:
-                drop-shadow(0 0 7px #00d9ff);
-        }
-
-        /* =========================
-           DESCRIPTION
-        ========================== */
-
-        .description {
-            max-width: 570px;
-
-            margin: 0 auto 30px;
-
-            padding: 18px 24px;
-
-            color: rgba(220, 243, 255, .88);
-
-            font-size: 16px;
-            line-height: 1.7;
-
-            font-weight: 300;
-
-            background: rgba(0, 100, 150, .08);
-
-            border:
-                1px solid rgba(0, 200, 255, .10);
-
-            border-radius: 22px;
-        }
-
-        .description i {
-            color: #6de5ff;
-
-            margin-right: 7px;
-        }
-
-        /* =========================
-           BUTTONS
-        ========================== */
-
-        .buttons {
-            display: flex;
-
-            justify-content: center;
-
-            gap: 18px;
-
-            flex-wrap: wrap;
-
-            margin: 30px 0 35px;
-        }
-
-        .btn {
-            min-width: 210px;
-
-            display: inline-flex;
-
-            align-items: center;
-            justify-content: center;
-
-            gap: 11px;
-
-            padding: 16px 25px;
-
-            border-radius: 60px;
-
-            text-decoration: none;
-
-            color: #e7faff;
-
-            font-size: 15px;
-            font-weight: 600;
-
-            background:
-                linear-gradient(
-                    145deg,
-                    rgba(15, 54, 82, .75),
-                    rgba(7, 29, 49, .75)
-                );
-
-            border:
-                1px solid rgba(0, 205, 255, .45);
-
-            box-shadow:
-                0 10px 25px rgba(0,0,0,.3),
-                inset 0 0 15px rgba(0,190,255,.03);
-
-            transition:
-                transform .25s ease,
-                box-shadow .25s ease,
-                border-color .25s ease,
-                background .25s ease;
-        }
-
-        .btn i {
-            color: #62dcff;
-
-            font-size: 17px;
-
-            filter:
-                drop-shadow(0 0 6px rgba(0, 217, 255, .5));
-        }
-
-        .btn:hover {
-            transform: translateY(-5px);
-
-            color: white;
-
-            border-color: #00eaff;
-
-            background:
-                linear-gradient(
-                    145deg,
-                    rgba(20, 80, 115, .8),
-                    rgba(8, 38, 62, .8)
-                );
-
-            box-shadow:
-                0 15px 35px rgba(0,0,0,.4),
-                0 0 30px rgba(0, 200, 255, .20);
-        }
-
-        .btn:active {
-            transform: translateY(-1px);
-        }
-
-        /* =========================
-           FEATURES
-        ========================== */
-
-        .features {
-            display: flex;
-
-            justify-content: center;
-
-            align-items: center;
-
-            flex-wrap: wrap;
-
-            gap: 10px;
-
-            margin-top: 10px;
-        }
-
-        .feature {
-            display: inline-flex;
-
-            align-items: center;
-
-            gap: 7px;
-
-            padding: 8px 14px;
-
-            border-radius: 50px;
-
-            color: #a9dff0;
-
-            font-size: 12px;
-
-            background: rgba(0, 180, 255, .07);
-
-            border:
-                1px solid rgba(0, 200, 255, .17);
-
-            backdrop-filter: blur(5px);
-        }
-
-        .feature i {
-            color: #46dfff;
-
-            font-size: 11px;
-        }
-
-        /* =========================
-           FOOTER
-        ========================== */
-
-        footer {
-            position: relative;
-            z-index: 10;
-
-            width: 100%;
-            max-width: 760px;
-
-            text-align: center;
-
-            margin: 5px auto 20px;
-
-            padding: 17px 20px;
-
-            border-radius: 50px;
-
-            background:
-                rgba(3, 21, 35, .55);
-
-            border:
-                1px solid rgba(0, 190, 255, .16);
-
-            backdrop-filter: blur(12px);
-
-            color: #8fb9c9;
-
-            font-size: 12px;
-
-            line-height: 1.7;
-        }
-
-        footer strong {
-            color: #6ddfff;
-
-            font-weight: 700;
-        }
-
-        footer .heart {
-            color: #ff668b;
-
-            filter:
-                drop-shadow(0 0 6px rgba(255, 80, 130, .5));
-        }
-
-        /* =========================
-           MOBILE
-        ========================== */
-
-        @media (max-width: 600px) {
-
-            body {
-                padding: 14px;
-            }
-
-            .container {
-                margin: 15px auto;
-            }
-
-            .card {
-                padding: 38px 18px;
-
-                border-radius: 32px;
-            }
-
-            .logo {
-                width: 75px;
-                height: 75px;
-
-                border-radius: 23px;
-            }
-
-            .logo i {
-                font-size: 34px;
-            }
-
-            h1 {
-                letter-spacing: -2px;
-            }
-
-            .subtitle {
-                font-size: 13px;
-            }
-
-            .description {
-                font-size: 14px;
-
-                padding: 15px 16px;
-
-                border-radius: 18px;
-            }
-
-            .buttons {
-                flex-direction: column;
-
-                gap: 12px;
-            }
-
-            .btn {
-                width: 100%;
-
-                min-width: 0;
-
-                padding: 15px 20px;
-            }
-
-            .features {
-                gap: 8px;
-            }
-
-            .feature {
-                font-size: 10px;
-
-                padding: 7px 10px;
-            }
-
-            footer {
-                border-radius: 25px;
-
-                font-size: 11px;
-            }
-        }
-
-        @media (max-width: 380px) {
-
-            .card {
-                padding: 32px 14px;
-            }
-
-            .status {
-                font-size: 11px;
-
-                padding: 8px 13px;
-            }
-
-            .feature {
-                width: 100%;
-
-                justify-content: center;
-            }
-        }
-    </style>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <title>PUTTUS-AI Pair Code</title>
+
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: Arial, sans-serif;
+    }
+
+    body {
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: #f5f5f5;
+      padding: 20px;
+    }
+
+    .box {
+      width: 100%;
+      max-width: 360px;
+      background: #fff;
+      padding: 30px;
+      border-radius: 15px;
+      text-align: center;
+      box-shadow: 0 5px 25px rgba(0, 0, 0, 0.12);
+    }
+
+    h1 {
+      font-size: 26px;
+      margin-bottom: 8px;
+    }
+
+    p {
+      color: #777;
+      font-size: 14px;
+      margin-bottom: 25px;
+    }
+
+    input {
+      width: 100%;
+      padding: 13px;
+      border: 1px solid #ddd;
+      border-radius: 8px;
+      outline: none;
+      font-size: 15px;
+      margin-bottom: 12px;
+    }
+
+    button {
+      width: 100%;
+      padding: 13px;
+      border: none;
+      border-radius: 8px;
+      background: #111;
+      color: white;
+      font-size: 15px;
+      cursor: pointer;
+    }
+
+    button:disabled {
+      opacity: 0.6;
+    }
+
+    #result {
+      margin-top: 20px;
+      font-size: 14px;
+    }
+
+    .code {
+      margin-top: 10px;
+      padding: 15px;
+      background: #f1f1f1;
+      border-radius: 8px;
+      font-size: 24px;
+      font-weight: bold;
+      letter-spacing: 4px;
+      user-select: all;
+    }
+  </style>
 </head>
 
 <body>
 
-    <!-- Background -->
-    <div class="orb one"></div>
-    <div class="orb two"></div>
+  <div class="box">
 
-    <div id="particles"></div>
+    <h1>PUTTUS-AI</h1>
 
+    <p>WhatsApp Pair Code Generator</p>
 
-    <!-- Main -->
-    <main class="container">
+    <input
+      id="number"
+      type="tel"
+      placeholder="919876543210"
+    >
 
-        <section class="card" id="mainCard">
+    <button id="btn" onclick="generateCode()">
+      Generate Pair Code
+    </button>
 
-            <!-- Status -->
-            <div class="status">
-                <span class="status-dot"></span>
-                Session Server Online
+    <div id="result"></div>
+
+  </div>
+
+  <script>
+    async function generateCode() {
+
+      const number =
+        document.getElementById("number")
+          .value
+          .replace(/\D/g, "");
+
+      const button =
+        document.getElementById("btn");
+
+      const result =
+        document.getElementById("result");
+
+      if (!number) {
+        result.innerHTML =
+          "Please enter your WhatsApp number.";
+        return;
+      }
+
+      button.disabled = true;
+      button.innerText = "Generating...";
+      result.innerHTML = "Please wait...";
+
+      try {
+
+        const response = await fetch(
+          "/pair?number=" +
+          encodeURIComponent(number)
+        );
+
+        const data = await response.json();
+
+        if (data.code) {
+
+          result.innerHTML = `
+            <div>Your Pair Code</div>
+
+            <div class="code">
+              ${data.code}
             </div>
+          `;
 
+        } else {
 
-            <!-- Logo -->
-            <div class="logo">
-                <i class="fa-solid fa-robot"></i>
-            </div>
-
-
-            <!-- Title -->
-            <h1>PUTTUS-AI</h1>
-
-
-            <!-- Subtitle -->
-            <div class="subtitle">
-                <i class="fa-solid fa-circle-check"></i>
-                Seamless & Secure
-            </div>
-
-
-            <!-- Description -->
-            <p class="description">
-                <i class="fa-solid fa-gem"></i>
-
-                Advanced WhatsApp bot session management.
-                Pair your device using a secure pairing code
-                or connect instantly with QR code.
-            </p>
-
-
-            <!-- Buttons -->
-            <div class="buttons">
-
-                <a href="./pair" class="btn">
-                    <i class="fa-solid fa-link"></i>
-                    Get Pair Code
-                </a>
-
-                <a href="./qr" class="btn">
-                    <i class="fa-solid fa-qrcode"></i>
-                    Scan QR Code
-                </a>
-
-            </div>
-
-
-            <!-- Features -->
-            <div class="features">
-
-                <span class="feature">
-                    <i class="fa-solid fa-bolt"></i>
-                    Instant Sync
-                </span>
-
-                <span class="feature">
-                    <i class="fa-solid fa-shield-halved"></i>
-                    Secure
-                </span>
-
-                <span class="feature">
-                    <i class="fa-solid fa-key"></i>
-                    Multi Device
-                </span>
-
-                <span class="feature">
-                    <i class="fa-solid fa-star"></i>
-                    24/7 Active
-                </span>
-
-            </div>
-
-        </section>
-
-    </main>
-
-
-    <!-- Footer -->
-    <footer>
-
-        <div>
-            <i class="fa-solid fa-crown"
-               style="color:#f4d35e;"></i>
-
-            <strong>MADE BY PUTTUS</strong>
-
-            <i class="fa-solid fa-crown"
-               style="color:#f4d35e;"></i>
-        </div>
-
-        <div>
-            © 2026 PUTTUS-AI
-            <span style="margin:0 7px;">•</span>
-
-            <i class="fa-solid fa-heart heart"></i>
-
-            Next-Gen WhatsApp Bot
-        </div>
-
-    </footer>
-
-
-    <script>
-
-        /* =====================================
-           PARTICLE SYSTEM
-        ====================================== */
-
-        const particleContainer =
-            document.getElementById("particles");
-
-        const particleCount = 65;
-
-        for (let i = 0; i < particleCount; i++) {
-
-            const particle =
-                document.createElement("span");
-
-            particle.className = "particle";
-
-            const size =
-                Math.random() * 4 + 1.5;
-
-            particle.style.width =
-                size + "px";
-
-            particle.style.height =
-                size + "px";
-
-            particle.style.left =
-                Math.random() * 100 + "%";
-
-            particle.style.animationDuration =
-                (7 + Math.random() * 14) + "s";
-
-            particle.style.animationDelay =
-                (Math.random() * 10) + "s";
-
-            particleContainer.appendChild(particle);
-        }
-
-
-        /* =====================================
-           CARD MOUSE EFFECT
-        ====================================== */
-
-        const card =
-            document.getElementById("mainCard");
-
-        if (window.matchMedia("(pointer:fine)").matches) {
-
-            card.addEventListener("mousemove", function(e) {
-
-                const rect =
-                    card.getBoundingClientRect();
-
-                const x =
-                    e.clientX - rect.left;
-
-                const y =
-                    e.clientY - rect.top;
-
-                const centerX =
-                    rect.width / 2;
-
-                const centerY =
-                    rect.height / 2;
-
-                const rotateX =
-                    (y - centerY) / 45;
-
-                const rotateY =
-                    (centerX - x) / 45;
-
-                card.style.transform =
-                    `perspective(1000px)
-                     rotateX(${rotateX}deg)
-                     rotateY(${rotateY}deg)
-                     translateY(-2px)`;
-            });
-
-
-            card.addEventListener("mouseleave", function() {
-
-                card.style.transform =
-                    "perspective(1000px) rotateX(0deg) rotateY(0deg) translateY(0)";
-
-            });
+          result.innerHTML =
+            data.message ||
+            "Pair code generation failed.";
 
         }
 
+      } catch (error) {
 
-        /* ==========================
+        result.innerHTML =
+          "Server connection failed.";
+
+      }
+
+      button.disabled = false;
+      button.innerText = "Generate Pair Code";
+    }
+  </script>
+
+</body>
+</html>
