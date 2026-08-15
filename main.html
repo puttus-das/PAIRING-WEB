@@ -1,477 +1,930 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>PUTTUS-AI • WhatsApp Session</title>
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Mono:wght@300;400&display=swap" rel="stylesheet">
-  <style>
-    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 
-    :root {
-      --bg: #050508;
-      --surface: rgba(255,255,255,0.03);
-      --border: rgba(255,255,255,0.07);
-      --neon: #00ff88;
-      --neon2: #00cfff;
-      --tg: #2CA5E0;
-      --text: #e8eaf0;
-      --muted: rgba(232,234,240,0.4);
-    }
+    <title>PUTTUS-AI • Session Portal</title>
 
-    html { width: 100%; min-height: 100%; }
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
 
-    body {
-      background: var(--bg);
-      color: var(--text);
-      font-family: 'Syne', sans-serif;
-      min-height: 100vh;
-      overflow-x: hidden;
-      overflow-y: auto;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      position: relative;
-    }
+    <link
+        rel="stylesheet"
+        href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css"
+    >
 
-    #bg-canvas {
-      position: fixed;
-      inset: 0;
-      z-index: 0;
-      pointer-events: none;
-    }
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
 
-    body::before {
-      content: '';
-      position: fixed;
-      inset: 0;
-      background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.04'/%3E%3C/svg%3E");
-      pointer-events: none;
-      z-index: 1;
-      opacity: 0.6;
-    }
+        :root {
+            --cyan: #00d9ff;
+            --blue: #008cff;
+            --light: #dff9ff;
+            --glass: rgba(7, 25, 43, 0.55);
+            --border: rgba(0, 217, 255, 0.30);
+        }
 
-    .orb {
-      position: fixed;
-      border-radius: 50%;
-      filter: blur(120px);
-      pointer-events: none;
-      z-index: 0;
-    }
-    .orb-1 {
-      width: 600px; height: 600px;
-      background: radial-gradient(circle, rgba(0,255,136,0.1), transparent 70%);
-      top: -200px; left: -200px;
-      animation: drift1 18s ease-in-out infinite alternate;
-    }
-    .orb-2 {
-      width: 500px; height: 500px;
-      background: radial-gradient(circle, rgba(0,207,255,0.09), transparent 70%);
-      bottom: -150px; right: -150px;
-      animation: drift2 22s ease-in-out infinite alternate;
-    }
-    .orb-3 {
-      width: 350px; height: 350px;
-      background: radial-gradient(circle, rgba(162,89,255,0.07), transparent 70%);
-      top: 50%; left: 50%;
-      transform: translate(-50%, -50%);
-      animation: drift3 15s ease-in-out infinite alternate;
-    }
+        html {
+            scroll-behavior: smooth;
+        }
 
-    @keyframes drift1 { to { transform: translate(100px, 80px); } }
-    @keyframes drift2 { to { transform: translate(-80px, -100px); } }
-    @keyframes drift3 { to { transform: translate(-50%, -50%) scale(1.4); } }
+        body {
+            min-height: 100vh;
+            overflow-x: hidden;
 
-    /* ── WRAPPER ── */
-    .wrapper {
-      position: relative;
-      z-index: 2;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      padding: clamp(48px, 8vh, 80px) clamp(16px, 4vw, 32px) clamp(48px, 8vh, 80px);
-      width: 100%;
-      max-width: 720px;
-    }
+            font-family: 'Inter', system-ui, sans-serif;
+            color: white;
 
-    .badge {
-      font-family: 'DM Mono', monospace;
-      font-size: 11px;
-      font-weight: 300;
-      letter-spacing: 3px;
-      text-transform: uppercase;
-      color: var(--neon);
-      background: rgba(0,255,136,0.08);
-      border: 1px solid rgba(0,255,136,0.2);
-      padding: 6px 18px;
-      border-radius: 100px;
-      margin-bottom: 32px;
-      animation: fadeUp 0.6s ease both;
-      animation-delay: 0.1s;
-    }
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
 
-    .brand {
-      text-align: center;
-      margin-bottom: 16px;
-      animation: fadeUp 0.6s ease both;
-      animation-delay: 0.2s;
-    }
+            padding: 20px;
 
-    .brand-name {
-      font-size: clamp(3.5rem, 10vw, 6.5rem);
-      font-weight: 800;
-      line-height: 1;
-      letter-spacing: -3px;
-      background: linear-gradient(135deg, #ffffff 0%, rgba(255,255,255,0.55) 100%);
-      -webkit-background-clip: text;
-      -webkit-text-fill-color: transparent;
-      background-clip: text;
-    }
+            background:
+                radial-gradient(
+                    circle at 20% 10%,
+                    rgba(0, 180, 255, 0.18),
+                    transparent 35%
+                ),
+                radial-gradient(
+                    circle at 90% 90%,
+                    rgba(80, 0, 255, 0.14),
+                    transparent 35%
+                ),
+                linear-gradient(
+                    145deg,
+                    #020910,
+                    #041522,
+                    #02080e
+                );
+        }
 
-    .brand-name .accent {
-      background: linear-gradient(135deg, var(--neon), var(--neon2));
-      -webkit-background-clip: text;
-      -webkit-text-fill-color: transparent;
-      background-clip: text;
-    }
+        /* =========================
+           BACKGROUND ORBS
+        ========================== */
 
-    .brand-sub {
-      font-family: 'DM Mono', monospace;
-      font-size: clamp(10px, 2vw, 13px);
-      font-weight: 300;
-      color: var(--muted);
-      letter-spacing: 5px;
-      text-transform: uppercase;
-      margin-top: 10px;
-    }
+        .orb {
+            position: fixed;
+            width: 55vmax;
+            height: 55vmax;
 
-    .divider {
-      width: 60px;
-      height: 1px;
-      background: linear-gradient(90deg, transparent, var(--neon), transparent);
-      margin: 32px auto;
-      animation: fadeUp 0.6s ease both;
-      animation-delay: 0.3s;
-    }
+            border-radius: 50%;
 
-    /* ── GRIDS ── */
-    .grid-main {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 14px;
-      width: 100%;
-      animation: fadeUp 0.6s ease both;
-      animation-delay: 0.4s;
-    }
+            background:
+                radial-gradient(
+                    circle,
+                    rgba(0, 210, 255, 0.20),
+                    rgba(0, 100, 255, 0.05) 55%,
+                    transparent 70%
+                );
 
-    .grid-social {
-      display: grid;
-      grid-template-columns: 1fr 1fr 1fr;
-      gap: 14px;
-      width: 100%;
-      margin-top: 14px;
-      animation: fadeUp 0.6s ease both;
-      animation-delay: 0.5s;
-    }
+            filter: blur(80px);
 
-    /* ── CARDS ── */
-    .card {
-      position: relative;
-      background: var(--surface);
-      border: 1px solid var(--border);
-      border-radius: 22px;
-      padding: 30px 22px 26px;
-      cursor: pointer;
-      display: flex;
-      flex-direction: column;
-      align-items: flex-start;
-      gap: 12px;
-      text-decoration: none;
-      color: inherit;
-      overflow: hidden;
-      transition: border-color 0.3s, transform 0.25s, box-shadow 0.3s;
-      backdrop-filter: blur(16px);
-      -webkit-backdrop-filter: blur(16px);
-    }
+            pointer-events: none;
+            z-index: 0;
 
-    .card-sm {
-      padding: 22px 18px 20px;
-      border-radius: 18px;
-    }
+            animation: orbFloat 20s infinite alternate ease-in-out;
+        }
 
-    .card::before {
-      content: '';
-      position: absolute;
-      inset: 0;
-      background: linear-gradient(135deg, rgba(255,255,255,0.04), transparent);
-      border-radius: inherit;
-      pointer-events: none;
-    }
+        .orb.one {
+            top: -25%;
+            left: -20%;
+        }
 
-    .card::after {
-      content: '';
-      position: absolute;
-      bottom: 0; left: 0; right: 0;
-      height: 1px;
-      background: var(--card-glow, var(--neon));
-      opacity: 0;
-      transform: scaleX(0);
-      transition: opacity 0.3s, transform 0.4s;
-    }
+        .orb.two {
+            right: -25%;
+            bottom: -25%;
 
-    .card:hover {
-      border-color: rgba(255,255,255,0.15);
-      transform: translateY(-5px);
-      box-shadow: 0 24px 64px rgba(0,0,0,0.5), 0 0 40px var(--card-shadow, rgba(0,255,136,0.08));
-    }
+            background:
+                radial-gradient(
+                    circle,
+                    rgba(120, 0, 255, 0.16),
+                    rgba(0, 160, 255, 0.05) 55%,
+                    transparent 70%
+                );
 
-    .card:hover::after { opacity: 1; transform: scaleX(1); }
-    .card:active { transform: translateY(-2px) scale(0.98); }
+            animation-duration: 28s;
+        }
 
-    .card-icon {
-      width: 46px; height: 46px;
-      border-radius: 14px;
-      display: flex; align-items: center; justify-content: center;
-      font-size: 22px;
-      background: var(--card-icon-bg, rgba(0,255,136,0.1));
-      border: 1px solid var(--card-icon-border, rgba(0,255,136,0.2));
-      transition: transform 0.3s;
-      flex-shrink: 0;
-    }
+        @keyframes orbFloat {
+            from {
+                transform: translate(0, 0) scale(1);
+            }
 
-    .card-sm .card-icon {
-      width: 38px; height: 38px;
-      border-radius: 11px;
-      font-size: 18px;
-    }
+            to {
+                transform: translate(10%, 12%) scale(1.25);
+            }
+        }
 
-    .card:hover .card-icon { transform: scale(1.12) rotate(-5deg); }
+        /* =========================
+           PARTICLES
+        ========================== */
 
-    .card-label {
-      font-size: 16px;
-      font-weight: 700;
-      letter-spacing: 0.4px;
-      color: #fff;
-    }
+        #particles {
+            position: fixed;
+            inset: 0;
 
-    .card-sm .card-label { font-size: 14px; }
+            overflow: hidden;
 
-    .card-desc {
-      font-family: 'DM Mono', monospace;
-      font-size: 11px;
-      font-weight: 300;
-      color: var(--muted);
-      letter-spacing: 0.3px;
-      line-height: 1.6;
-    }
+            pointer-events: none;
+            z-index: 1;
+        }
 
-    .card-sm .card-desc { font-size: 10px; }
+        .particle {
+            position: absolute;
 
-    .card-arrow {
-      position: absolute;
-      top: 20px; right: 20px;
-      font-size: 18px;
-      color: var(--muted);
-      transition: transform 0.3s, color 0.3s;
-    }
+            width: 3px;
+            height: 3px;
 
-    .card:hover .card-arrow { transform: translate(3px, -3px); color: #fff; }
+            border-radius: 50%;
 
-    .card-qr   { --card-glow: var(--neon);  --card-shadow: rgba(0,255,136,0.1);   --card-icon-bg: rgba(0,255,136,0.1);   --card-icon-border: rgba(0,255,136,0.25); }
-    .card-pair { --card-glow: var(--neon2); --card-shadow: rgba(0,207,255,0.1);   --card-icon-bg: rgba(0,207,255,0.1);   --card-icon-border: rgba(0,207,255,0.25); }
-    .card-gh   { --card-glow: rgba(232,234,240,0.3); --card-shadow: rgba(255,255,255,0.05); --card-icon-bg: rgba(255,255,255,0.06); --card-icon-border: rgba(255,255,255,0.12); }
-    .card-wa   { --card-glow: #25d366;      --card-shadow: rgba(37,211,102,0.1);  --card-icon-bg: rgba(37,211,102,0.1);  --card-icon-border: rgba(37,211,102,0.25); }
-    .card-tg   { --card-glow: var(--tg);    --card-shadow: rgba(44,165,224,0.1);  --card-icon-bg: rgba(44,165,224,0.1);  --card-icon-border: rgba(44,165,224,0.25); }
+            background: #5eeaff;
 
-    .footer {
-      margin-top: 44px;
-      font-family: 'DM Mono', monospace;
-      font-size: 11px;
-      font-weight: 300;
-      color: rgba(232,234,240,0.18);
-      letter-spacing: 2px;
-      text-align: center;
-      animation: fadeUp 0.6s ease both;
-      animation-delay: 0.6s;
-    }
+            box-shadow:
+                0 0 8px #00d9ff,
+                0 0 18px rgba(0, 217, 255, .5);
 
-    .footer a { color: rgba(0,255,136,0.45); text-decoration: none; transition: color 0.2s; }
-    .footer a:hover { color: var(--neon); }
+            animation: particleMove linear infinite;
+        }
 
-    @keyframes fadeUp {
-      from { opacity: 0; transform: translateY(28px); }
-      to   { opacity: 1; transform: translateY(0); }
-    }
+        @keyframes particleMove {
+            0% {
+                transform:
+                    translateY(105vh)
+                    translateX(0)
+                    scale(1);
 
-    /* ── MOBILE ── */
-    @media (max-width: 520px) {
-      .grid-main   { grid-template-columns: 1fr; gap: 10px; }
-      .grid-social { grid-template-columns: 1fr; gap: 10px; }
+                opacity: 0;
+            }
 
-      .card, .card-sm {
-        flex-direction: row;
-        align-items: center;
-        padding: 18px 52px 18px 16px;
-        gap: 14px;
-        border-radius: 16px;
-      }
+            15% {
+                opacity: .7;
+            }
 
-      .card-icon { width: 40px !important; height: 40px !important; font-size: 18px !important; border-radius: 11px !important; }
-      .card-arrow { top: 50%; right: 16px; transform: translateY(-50%); }
-      .card:hover .card-arrow { transform: translateY(-50%) translateX(3px); }
-    }
+            80% {
+                opacity: .35;
+            }
 
-    /* ── TABLET ── */
-    @media (min-width: 521px) and (max-width: 680px) {
-      .grid-social { grid-template-columns: 1fr 1fr; }
-      .card-tg { grid-column: span 2; }
-    }
-  </style>
+            100% {
+                transform:
+                    translateY(-15vh)
+                    translateX(60px)
+                    scale(.1);
+
+                opacity: 0;
+            }
+        }
+
+        /* =========================
+           MAIN CARD
+        ========================== */
+
+        .container {
+            width: 100%;
+            max-width: 760px;
+
+            position: relative;
+            z-index: 10;
+
+            margin: 30px auto;
+        }
+
+        .card {
+            position: relative;
+
+            padding: 55px 40px;
+
+            text-align: center;
+
+            border-radius: 42px;
+
+            background:
+                linear-gradient(
+                    145deg,
+                    rgba(10, 39, 64, .70),
+                    rgba(2, 17, 30, .55)
+                );
+
+            border: 1px solid var(--border);
+
+            backdrop-filter: blur(22px) saturate(150%);
+            -webkit-backdrop-filter: blur(22px) saturate(150%);
+
+            box-shadow:
+                0 30px 80px rgba(0, 0, 0, .55),
+                inset 0 0 40px rgba(0, 200, 255, .035),
+                0 0 0 1px rgba(255,255,255,.02);
+
+            transition:
+                transform .25s ease,
+                border-color .25s ease,
+                box-shadow .25s ease;
+        }
+
+        .card:hover {
+            border-color: rgba(0, 225, 255, .55);
+
+            box-shadow:
+                0 35px 90px rgba(0, 0, 0, .65),
+                0 0 45px rgba(0, 180, 255, .12);
+        }
+
+        /* =========================
+           STATUS
+        ========================== */
+
+        .status {
+            display: inline-flex;
+
+            align-items: center;
+            gap: 9px;
+
+            padding: 9px 18px;
+
+            margin-bottom: 25px;
+
+            border-radius: 50px;
+
+            background: rgba(0, 70, 90, .25);
+
+            border: 1px solid rgba(0, 210, 255, .35);
+
+            color: #d9fbff;
+
+            font-size: 13px;
+            font-weight: 500;
+
+            box-shadow:
+                0 0 20px rgba(0, 200, 255, .12);
+        }
+
+        .status-dot {
+            width: 8px;
+            height: 8px;
+
+            border-radius: 50%;
+
+            background: #2cff88;
+
+            box-shadow:
+                0 0 8px #2cff88,
+                0 0 16px rgba(44,255,136,.6);
+
+            animation: statusPulse 2s infinite;
+        }
+
+        @keyframes statusPulse {
+            0%, 100% {
+                opacity: .6;
+                transform: scale(.9);
+            }
+
+            50% {
+                opacity: 1;
+                transform: scale(1.15);
+            }
+        }
+
+        /* =========================
+           LOGO
+        ========================== */
+
+        .logo {
+            width: 90px;
+            height: 90px;
+
+            margin: 0 auto 22px;
+
+            display: flex;
+            align-items: center;
+            justify-content: center;
+
+            border-radius: 28px;
+
+            background:
+                linear-gradient(
+                    145deg,
+                    rgba(0, 217, 255, .16),
+                    rgba(0, 100, 255, .06)
+                );
+
+            border: 1px solid rgba(0, 217, 255, .35);
+
+            box-shadow:
+                0 0 30px rgba(0, 190, 255, .14),
+                inset 0 0 20px rgba(0, 190, 255, .08);
+
+            transform: rotate(-2deg);
+        }
+
+        .logo i {
+            font-size: 42px;
+
+            color: var(--cyan);
+
+            filter:
+                drop-shadow(0 0 10px rgba(0, 217, 255, .8));
+        }
+
+        /* =========================
+           TITLE
+        ========================== */
+
+        h1 {
+            font-size: clamp(3rem, 9vw, 5rem);
+
+            line-height: 1;
+
+            font-weight: 800;
+
+            letter-spacing: -3px;
+
+            margin-bottom: 15px;
+
+            background:
+                linear-gradient(
+                    120deg,
+                    #ffffff,
+                    #9cecff,
+                    #38cfff,
+                    #ffffff
+                );
+
+            background-size: 250% auto;
+
+            -webkit-background-clip: text;
+            background-clip: text;
+
+            color: transparent;
+
+            animation: titleGlow 5s linear infinite;
+
+            filter:
+                drop-shadow(0 0 18px rgba(0, 190, 255, .35));
+        }
+
+        @keyframes titleGlow {
+            to {
+                background-position: 250% center;
+            }
+        }
+
+        .subtitle {
+            display: inline-flex;
+
+            align-items: center;
+            gap: 8px;
+
+            color: #a9eaff;
+
+            font-size: 16px;
+            font-weight: 400;
+
+            padding-bottom: 15px;
+
+            border-bottom:
+                1px dashed rgba(90, 210, 255, .4);
+
+            margin-bottom: 28px;
+        }
+
+        .subtitle i {
+            color: #49ddff;
+
+            filter:
+                drop-shadow(0 0 7px #00d9ff);
+        }
+
+        /* =========================
+           DESCRIPTION
+        ========================== */
+
+        .description {
+            max-width: 570px;
+
+            margin: 0 auto 30px;
+
+            padding: 18px 24px;
+
+            color: rgba(220, 243, 255, .88);
+
+            font-size: 16px;
+            line-height: 1.7;
+
+            font-weight: 300;
+
+            background: rgba(0, 100, 150, .08);
+
+            border:
+                1px solid rgba(0, 200, 255, .10);
+
+            border-radius: 22px;
+        }
+
+        .description i {
+            color: #6de5ff;
+
+            margin-right: 7px;
+        }
+
+        /* =========================
+           BUTTONS
+        ========================== */
+
+        .buttons {
+            display: flex;
+
+            justify-content: center;
+
+            gap: 18px;
+
+            flex-wrap: wrap;
+
+            margin: 30px 0 35px;
+        }
+
+        .btn {
+            min-width: 210px;
+
+            display: inline-flex;
+
+            align-items: center;
+            justify-content: center;
+
+            gap: 11px;
+
+            padding: 16px 25px;
+
+            border-radius: 60px;
+
+            text-decoration: none;
+
+            color: #e7faff;
+
+            font-size: 15px;
+            font-weight: 600;
+
+            background:
+                linear-gradient(
+                    145deg,
+                    rgba(15, 54, 82, .75),
+                    rgba(7, 29, 49, .75)
+                );
+
+            border:
+                1px solid rgba(0, 205, 255, .45);
+
+            box-shadow:
+                0 10px 25px rgba(0,0,0,.3),
+                inset 0 0 15px rgba(0,190,255,.03);
+
+            transition:
+                transform .25s ease,
+                box-shadow .25s ease,
+                border-color .25s ease,
+                background .25s ease;
+        }
+
+        .btn i {
+            color: #62dcff;
+
+            font-size: 17px;
+
+            filter:
+                drop-shadow(0 0 6px rgba(0, 217, 255, .5));
+        }
+
+        .btn:hover {
+            transform: translateY(-5px);
+
+            color: white;
+
+            border-color: #00eaff;
+
+            background:
+                linear-gradient(
+                    145deg,
+                    rgba(20, 80, 115, .8),
+                    rgba(8, 38, 62, .8)
+                );
+
+            box-shadow:
+                0 15px 35px rgba(0,0,0,.4),
+                0 0 30px rgba(0, 200, 255, .20);
+        }
+
+        .btn:active {
+            transform: translateY(-1px);
+        }
+
+        /* =========================
+           FEATURES
+        ========================== */
+
+        .features {
+            display: flex;
+
+            justify-content: center;
+
+            align-items: center;
+
+            flex-wrap: wrap;
+
+            gap: 10px;
+
+            margin-top: 10px;
+        }
+
+        .feature {
+            display: inline-flex;
+
+            align-items: center;
+
+            gap: 7px;
+
+            padding: 8px 14px;
+
+            border-radius: 50px;
+
+            color: #a9dff0;
+
+            font-size: 12px;
+
+            background: rgba(0, 180, 255, .07);
+
+            border:
+                1px solid rgba(0, 200, 255, .17);
+
+            backdrop-filter: blur(5px);
+        }
+
+        .feature i {
+            color: #46dfff;
+
+            font-size: 11px;
+        }
+
+        /* =========================
+           FOOTER
+        ========================== */
+
+        footer {
+            position: relative;
+            z-index: 10;
+
+            width: 100%;
+            max-width: 760px;
+
+            text-align: center;
+
+            margin: 5px auto 20px;
+
+            padding: 17px 20px;
+
+            border-radius: 50px;
+
+            background:
+                rgba(3, 21, 35, .55);
+
+            border:
+                1px solid rgba(0, 190, 255, .16);
+
+            backdrop-filter: blur(12px);
+
+            color: #8fb9c9;
+
+            font-size: 12px;
+
+            line-height: 1.7;
+        }
+
+        footer strong {
+            color: #6ddfff;
+
+            font-weight: 700;
+        }
+
+        footer .heart {
+            color: #ff668b;
+
+            filter:
+                drop-shadow(0 0 6px rgba(255, 80, 130, .5));
+        }
+
+        /* =========================
+           MOBILE
+        ========================== */
+
+        @media (max-width: 600px) {
+
+            body {
+                padding: 14px;
+            }
+
+            .container {
+                margin: 15px auto;
+            }
+
+            .card {
+                padding: 38px 18px;
+
+                border-radius: 32px;
+            }
+
+            .logo {
+                width: 75px;
+                height: 75px;
+
+                border-radius: 23px;
+            }
+
+            .logo i {
+                font-size: 34px;
+            }
+
+            h1 {
+                letter-spacing: -2px;
+            }
+
+            .subtitle {
+                font-size: 13px;
+            }
+
+            .description {
+                font-size: 14px;
+
+                padding: 15px 16px;
+
+                border-radius: 18px;
+            }
+
+            .buttons {
+                flex-direction: column;
+
+                gap: 12px;
+            }
+
+            .btn {
+                width: 100%;
+
+                min-width: 0;
+
+                padding: 15px 20px;
+            }
+
+            .features {
+                gap: 8px;
+            }
+
+            .feature {
+                font-size: 10px;
+
+                padding: 7px 10px;
+            }
+
+            footer {
+                border-radius: 25px;
+
+                font-size: 11px;
+            }
+        }
+
+        @media (max-width: 380px) {
+
+            .card {
+                padding: 32px 14px;
+            }
+
+            .status {
+                font-size: 11px;
+
+                padding: 8px 13px;
+            }
+
+            .feature {
+                width: 100%;
+
+                justify-content: center;
+            }
+        }
+    </style>
 </head>
+
 <body>
 
-  <div class="orb orb-1"></div>
-  <div class="orb orb-2"></div>
-  <div class="orb orb-3"></div>
-  <canvas id="bg-canvas"></canvas>
+    <!-- Background -->
+    <div class="orb one"></div>
+    <div class="orb two"></div>
 
-  <div class="wrapper">
-    <div class="badge">✦ Session Generator</div>
+    <div id="particles"></div>
 
-    <div class="brand">
-      <div class="brand-name">PUTTUS<span class="accent">-AI</span></div>
-      <div class="brand-sub">WhatsApp Bot Platform</div>
-    </div>
 
-    <div class="divider"></div>
+    <!-- Main -->
+    <main class="container">
 
-    <div class="grid-main">
-      <a class="card card-qr" onclick="window.open('/qrpage')" href="javascript:void(0)">
-        <div class="card-icon">⬛</div>
+        <section class="card" id="mainCard">
+
+            <!-- Status -->
+            <div class="status">
+                <span class="status-dot"></span>
+                Session Server Online
+            </div>
+
+
+            <!-- Logo -->
+            <div class="logo">
+                <i class="fa-solid fa-robot"></i>
+            </div>
+
+
+            <!-- Title -->
+            <h1>PUTTUS-AI</h1>
+
+
+            <!-- Subtitle -->
+            <div class="subtitle">
+                <i class="fa-solid fa-circle-check"></i>
+                Seamless & Secure
+            </div>
+
+
+            <!-- Description -->
+            <p class="description">
+                <i class="fa-solid fa-gem"></i>
+
+                Advanced WhatsApp bot session management.
+                Pair your device using a secure pairing code
+                or connect instantly with QR code.
+            </p>
+
+
+            <!-- Buttons -->
+            <div class="buttons">
+
+                <a href="./pair" class="btn">
+                    <i class="fa-solid fa-link"></i>
+                    Get Pair Code
+                </a>
+
+                <a href="./qr" class="btn">
+                    <i class="fa-solid fa-qrcode"></i>
+                    Scan QR Code
+                </a>
+
+            </div>
+
+
+            <!-- Features -->
+            <div class="features">
+
+                <span class="feature">
+                    <i class="fa-solid fa-bolt"></i>
+                    Instant Sync
+                </span>
+
+                <span class="feature">
+                    <i class="fa-solid fa-shield-halved"></i>
+                    Secure
+                </span>
+
+                <span class="feature">
+                    <i class="fa-solid fa-key"></i>
+                    Multi Device
+                </span>
+
+                <span class="feature">
+                    <i class="fa-solid fa-star"></i>
+                    24/7 Active
+                </span>
+
+            </div>
+
+        </section>
+
+    </main>
+
+
+    <!-- Footer -->
+    <footer>
+
         <div>
-          <div class="card-label">QR Code</div>
-          <div class="card-desc">Scan to link<br>your device</div>
-        </div>
-        <span class="card-arrow">↗</span>
-      </a>
+            <i class="fa-solid fa-crown"
+               style="color:#f4d35e;"></i>
 
-      <a class="card card-pair" onclick="window.open('/pair')" href="javascript:void(0)">
-        <div class="card-icon">🔑</div>
+            <strong>MADE BY PUTTUS</strong>
+
+            <i class="fa-solid fa-crown"
+               style="color:#f4d35e;"></i>
+        </div>
+
         <div>
-          <div class="card-label">Pair Code</div>
-          <div class="card-desc">Link via<br>phone number</div>
+            © 2026 PUTTUS-AI
+            <span style="margin:0 7px;">•</span>
+
+            <i class="fa-solid fa-heart heart"></i>
+
+            Next-Gen WhatsApp Bot
         </div>
-        <span class="card-arrow">↗</span>
-      </a>
-    </div>
 
-    <div class="grid-social">
-      <a class="card card-sm card-gh" onclick="window.open('https://github.com/puttus-das/PAIRING-WEB')" href="javascript:void(0)">
-        <div class="card-icon">
-          <svg width="17" height="17" viewBox="0 0 24 24" fill="currentColor" style="color:rgba(232,234,240,0.85)">
-            <path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0 0 24 12c0-6.63-5.37-12-12-12z"/>
-          </svg>
-        </div>
-        <div>
-          <div class="card-label">GitHub</div>
-          <div class="card-desc">Source &amp; releases</div>
-        </div>
-        <span class="card-arrow">↗</span>
-      </a>
+    </footer>
 
-      <a class="card card-sm card-wa" onclick="window.open('https://whatsapp.com/channel/0029Vb7pmbEEwEjzdGSM4G3B')" href="javascript:void(0)">
-        <div class="card-icon">
-          <svg width="17" height="17" viewBox="0 0 24 24" fill="currentColor" style="color:#25d366">
-            <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 0 1-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 0 1-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 0 1 2.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0 0 12.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 0 0 5.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 0 0-3.48-8.413Z"/>
-          </svg>
-        </div>
-        <div>
-          <div class="card-label">WhatsApp</div>
-          <div class="card-desc">Join channel</div>
-        </div>
-        <span class="card-arrow">↗</span>
-      </a>
 
-      <a class="card card-sm card-tg" onclick="window.open('https://t.me/Tohidkhan6332')" href="javascript:void(0)">
-        <div class="card-icon">
-          <svg width="17" height="17" viewBox="0 0 24 24" fill="currentColor" style="color:#2CA5E0">
-            <path d="M11.944 0A12 12 0 0 0 0 12a12 12 0 0 0 12 12 12 12 0 0 0 12-12A12 12 0 0 0 12 0a12 12 0 0 0-.056 0zm4.962 7.224c.1-.002.321.023.465.14a.506.506 0 0 1 .171.325c.016.093.036.306.02.472-.18 1.898-.962 6.502-1.36 8.627-.168.9-.499 1.201-.82 1.23-.696.065-1.225-.46-1.9-.902-1.056-.693-1.653-1.124-2.678-1.8-1.185-.78-.417-1.21.258-1.91.177-.184 3.247-2.977 3.307-3.23.007-.032.014-.15-.056-.212s-.174-.041-.249-.024c-.106.024-1.793 1.14-5.061 3.345-.48.33-.913.49-1.302.48-.428-.008-1.252-.241-1.865-.44-.752-.245-1.349-.374-1.297-.789.027-.216.325-.437.893-.663 3.498-1.524 5.83-2.529 6.998-3.014 3.332-1.386 4.025-1.627 4.476-1.635z"/>
-          </svg>
-        </div>
-        <div>
-          <div class="card-label">Telegram</div>
-          <div class="card-desc">Support group</div>
-        </div>
-        <span class="card-arrow">↗</span>
-      </a>
-    </div>
+    <script>
 
-    <div class="footer">
-      Built by <a href="https://github.com/puttus-das/PUTTUS-AI" target="_blank">puttus-das</a> &nbsp;•&nbsp; PUTTUS-AI v2
-    </div>
-  </div>
+        /* =====================================
+           PARTICLE SYSTEM
+        ====================================== */
 
-  <script>
-    const canvas = document.getElementById('bg-canvas');
-    const ctx = canvas.getContext('2d');
-    let W, H, nodes = [], animId;
+        const particleContainer =
+            document.getElementById("particles");
 
-    function resize() {
-      W = canvas.width = window.innerWidth;
-      H = canvas.height = window.innerHeight;
-    }
+        const particleCount = 65;
 
-    function initNodes() {
-      nodes = [];
-      const count = Math.min(Math.floor((W * H) / 16000), 65);
-      for (let i = 0; i < count; i++) {
-        nodes.push({
-          x: Math.random() * W,
-          y: Math.random() * H,
-          vx: (Math.random() - 0.5) * 0.25,
-          vy: (Math.random() - 0.5) * 0.25,
-          r: Math.random() * 1.5 + 0.5,
-          opacity: Math.random() * 0.4 + 0.1
-        });
-      }
-    }
+        for (let i = 0; i < particleCount; i++) {
 
-    function draw() {
-      ctx.clearRect(0, 0, W, H);
-      for (let i = 0; i < nodes.length; i++) {
-        const a = nodes[i];
-        a.x += a.vx; a.y += a.vy;
-        if (a.x < 0 || a.x > W) a.vx *= -1;
-        if (a.y < 0 || a.y > H) a.vy *= -1;
-        for (let j = i + 1; j < nodes.length; j++) {
-          const b = nodes[j];
-          const dx = a.x - b.x, dy = a.y - b.y;
-          const dist = Math.sqrt(dx * dx + dy * dy);
-          if (dist < 140) {
-            ctx.beginPath();
-            ctx.strokeStyle = `rgba(0,255,136,${(1 - dist / 140) * 0.11})`;
-            ctx.lineWidth = 0.5;
-            ctx.moveTo(a.x, a.y);
-            ctx.lineTo(b.x, b.y);
-            ctx.stroke();
-          }
+            const particle =
+                document.createElement("span");
+
+            particle.className = "particle";
+
+            const size =
+                Math.random() * 4 + 1.5;
+
+            particle.style.width =
+                size + "px";
+
+            particle.style.height =
+                size + "px";
+
+            particle.style.left =
+                Math.random() * 100 + "%";
+
+            particle.style.animationDuration =
+                (7 + Math.random() * 14) + "s";
+
+            particle.style.animationDelay =
+                (Math.random() * 10) + "s";
+
+            particleContainer.appendChild(particle);
         }
-        ctx.beginPath();
-        ctx.arc(a.x, a.y, a.r, 0, Math.PI * 2);
-        ctx.fillStyle = `rgba(0,255,136,${a.opacity})`;
-        ctx.fill();
-      }
-      animId = requestAnimationFrame(draw);
-    }
 
-    window.addEventListener('resize', () => {
-      cancelAnimationFrame(animId);
-      resize(); initNodes(); draw();
-    });
 
-    resize(); initNodes(); draw();
-  </script>
-</body>
-</html>
+        /* =====================================
+           CARD MOUSE EFFECT
+        ====================================== */
+
+        const card =
+            document.getElementById("mainCard");
+
+        if (window.matchMedia("(pointer:fine)").matches) {
+
+            card.addEventListener("mousemove", function(e) {
+
+                const rect =
+                    card.getBoundingClientRect();
+
+                const x =
+                    e.clientX - rect.left;
+
+                const y =
+                    e.clientY - rect.top;
+
+                const centerX =
+                    rect.width / 2;
+
+                const centerY =
+                    rect.height / 2;
+
+                const rotateX =
+                    (y - centerY) / 45;
+
+                const rotateY =
+                    (centerX - x) / 45;
+
+                card.style.transform =
+                    `perspective(1000px)
+                     rotateX(${rotateX}deg)
+                     rotateY(${rotateY}deg)
+                     translateY(-2px)`;
+            });
+
+
+            card.addEventListener("mouseleave", function() {
+
+                card.style.transform =
+                    "perspective(1000px) rotateX(0deg) rotateY(0deg) translateY(0)";
+
+            });
+
+        }
+
+
+        /* ==========================
