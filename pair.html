@@ -57,7 +57,6 @@
     .container {
       width: 100%;
       max-width: 450px;
-
       padding: 30px;
 
       border-radius: 25px;
@@ -132,9 +131,7 @@
     .social-icons {
       display: flex;
       justify-content: center;
-
       gap: 13px;
-
       margin-top: 20px;
       margin-bottom: 25px;
     }
@@ -181,9 +178,7 @@
 
     .toggle-container {
       display: flex;
-
       padding: 5px;
-
       margin-bottom: 25px;
 
       border-radius: 16px;
@@ -311,8 +306,10 @@
         0 15px 35px rgba(102,126,234,.4);
     }
 
-    .generate-btn.hidden {
-      display: none;
+    .generate-btn:disabled {
+      opacity: .6;
+      cursor: not-allowed;
+      transform: none;
     }
 
     .loading {
@@ -325,7 +322,6 @@
 
     .loading i {
       font-size: 28px;
-
       color: #a5b4fc;
 
       animation: spin 1s linear infinite;
@@ -548,6 +544,8 @@
   </div>
 
 
+  <!-- MODE -->
+
   <div class="toggle-container">
 
     <div
@@ -569,6 +567,8 @@
   </div>
 
 
+  <!-- NUMBER -->
+
   <div
     class="input-group"
     id="inputGroup"
@@ -589,6 +589,8 @@
   </div>
 
 
+  <!-- GENERATE -->
+
   <button
     class="generate-btn"
     id="submit"
@@ -598,6 +600,8 @@
   </button>
 
 
+  <!-- LOADING -->
+
   <div
     class="loading"
     id="loading"
@@ -606,6 +610,8 @@
   </div>
 
 
+  <!-- CODE -->
+
   <div
     class="code-display"
     id="codeDisplay"
@@ -613,6 +619,8 @@
     Your pair code will appear here
   </div>
 
+
+  <!-- QR -->
 
   <div
     class="qr-display"
@@ -635,6 +643,8 @@
   </div>
 
 
+  <!-- COPY -->
+
   <button
     class="copy-btn"
     id="copy"
@@ -655,13 +665,21 @@
 
 <script>
 
+/* ==========================================
+   YOUR HEROKU BACKEND
+========================================== */
+
+const BACKEND_URL =
+  "https://putusdas-ea1f9de921f2.herokuapp.com";
+
+
 let currentMode = "pair";
 let currentPairCode = "";
 
 
-/* =========================
+/* ==========================================
    TOGGLE
-========================= */
+========================================== */
 
 document
 .querySelectorAll(".toggle-option")
@@ -669,56 +687,83 @@ document
 
   option.addEventListener("click", function() {
 
-    const mode = this.dataset.mode;
+    const mode =
+      this.dataset.mode;
 
-    if (mode === currentMode) return;
+    if (mode === currentMode)
+      return;
+
 
     document
     .querySelectorAll(".toggle-option")
     .forEach(opt => {
+
       opt.classList.remove("active");
+
     });
+
 
     this.classList.add("active");
 
     currentMode = mode;
 
+
     const inputGroup =
-      document.getElementById("inputGroup");
+      document.getElementById(
+        "inputGroup"
+      );
 
     const submit =
-      document.getElementById("submit");
+      document.getElementById(
+        "submit"
+      );
 
     const codeDisplay =
-      document.getElementById("codeDisplay");
+      document.getElementById(
+        "codeDisplay"
+      );
 
     const qrDisplay =
-      document.getElementById("qrDisplay");
+      document.getElementById(
+        "qrDisplay"
+      );
+
 
     currentPairCode = "";
+
 
     codeDisplay.innerHTML =
       "Your pair code will appear here";
 
-    codeDisplay.style.display = "flex";
+    codeDisplay.style.display =
+      "flex";
 
-    qrDisplay.style.display = "none";
+    qrDisplay.style.display =
+      "none";
 
 
     if (mode === "pair") {
 
-      inputGroup.style.display = "block";
+      inputGroup.style.display =
+        "block";
 
-      submit.classList.remove("hidden");
+      submit.style.display =
+        "block";
+
+      submit.disabled = false;
 
       submit.innerHTML =
         '<i class="fas fa-key"></i> Generate Pair Code';
 
-    } else {
+    }
 
-      inputGroup.style.display = "none";
+    else {
 
-      submit.classList.add("hidden");
+      inputGroup.style.display =
+        "none";
+
+      submit.style.display =
+        "none";
 
       generateQRCode();
 
@@ -729,32 +774,44 @@ document
 });
 
 
-/* =========================
-   PAIR CODE
-========================= */
+/* ==========================================
+   GENERATE PAIR CODE
+========================================== */
 
 document
 .getElementById("submit")
 .addEventListener("click", async function() {
 
   const input =
-    document.getElementById("mobileNumber");
+    document.getElementById(
+      "mobileNumber"
+    );
 
   const codeDisplay =
-    document.getElementById("codeDisplay");
+    document.getElementById(
+      "codeDisplay"
+    );
 
   const qrDisplay =
-    document.getElementById("qrDisplay");
+    document.getElementById(
+      "qrDisplay"
+    );
 
   const loading =
-    document.getElementById("loading");
+    document.getElementById(
+      "loading"
+    );
 
 
   let number =
     input.value.trim();
 
+
   number =
-    number.replace(/[^0-9]/g, "");
+    number.replace(
+      /[^0-9]/g,
+      ""
+    );
 
 
   if (!number) {
@@ -786,11 +843,17 @@ document
   }
 
 
-  loading.style.display = "block";
+  this.disabled = true;
 
-  qrDisplay.style.display = "none";
+  loading.style.display =
+    "block";
 
-  codeDisplay.style.display = "flex";
+  qrDisplay.style.display =
+    "none";
+
+  codeDisplay.style.display =
+    "flex";
+
 
   codeDisplay.innerHTML = `
     <div>
@@ -803,34 +866,30 @@ document
   try {
 
     /*
-     * IMPORTANT
-     *
-     * Your PAIRING-WEB backend uses:
-     *
-     * /code?number=XXXXXXXXXX
-     *
-     * NOT /pair
-     */
+      IMPORTANT:
+
+      Request goes to Heroku
+      NOT Vercel.
+
+      Endpoint:
+
+      /code?number=XXXXXXXX
+    */
 
     const response =
       await axios.get(
-        `/code?number=${encodeURIComponent(number)}`
+        `${BACKEND_URL}/code?number=${encodeURIComponent(number)}`,
+        {
+          timeout: 90000
+        }
       );
 
 
     console.log(
-      "PAIRING RESPONSE:",
+      "PAIR RESPONSE:",
       response.data
     );
 
-
-    /*
-     * Backend response:
-     *
-     * {
-     *   code: "XXXX-XXXX"
-     * }
-     */
 
     if (
       response.data &&
@@ -848,7 +907,9 @@ document
         </div>
       `;
 
-    } else {
+    }
+
+    else {
 
       codeDisplay.innerHTML = `
         <div class="error-message">
@@ -863,7 +924,9 @@ document
     }
 
 
-  } catch (error) {
+  }
+
+  catch (error) {
 
     console.error(
       "PAIR ERROR:",
@@ -872,19 +935,22 @@ document
 
 
     let message =
-      "Unable to generate pairing code";
+      "Unable to connect to pairing server";
 
 
     if (error.response) {
 
       message =
+        error.response.data?.code ||
         error.response.data?.error ||
         `Server error (${error.response.status})`;
 
-    } else if (error.request) {
+    }
+
+    else if (error.code === "ECONNABORTED") {
 
       message =
-        "Server did not respond";
+        "Request timed out. Please try again.";
 
     }
 
@@ -896,49 +962,71 @@ document
       </div>
     `;
 
+  }
 
-  } finally {
+  finally {
 
-    loading.style.display = "none";
+    loading.style.display =
+      "none";
+
+    this.disabled = false;
 
   }
 
 });
 
 
-/* =========================
+/* ==========================================
    QR CODE
-========================= */
+========================================== */
 
 async function generateQRCode() {
 
   const loading =
-    document.getElementById("loading");
+    document.getElementById(
+      "loading"
+    );
 
   const codeDisplay =
-    document.getElementById("codeDisplay");
+    document.getElementById(
+      "codeDisplay"
+    );
 
   const qrDisplay =
-    document.getElementById("qrDisplay");
+    document.getElementById(
+      "qrDisplay"
+    );
 
   const qrImage =
-    document.getElementById("qrImage");
+    document.getElementById(
+      "qrImage"
+    );
 
   const instructions =
-    document.getElementById("qrInstructions");
+    document.getElementById(
+      "qrInstructions"
+    );
 
 
-  loading.style.display = "block";
+  loading.style.display =
+    "block";
 
-  codeDisplay.style.display = "none";
+  codeDisplay.style.display =
+    "none";
 
-  qrDisplay.style.display = "none";
+  qrDisplay.style.display =
+    "none";
 
 
   try {
 
     const response =
-      await axios.get("/qr");
+      await axios.get(
+        `${BACKEND_URL}/qr`,
+        {
+          timeout: 90000
+        }
+      );
 
 
     if (
@@ -960,7 +1048,9 @@ async function generateQRCode() {
           response.data.instructions
           .join("<br>");
 
-      } else {
+      }
+
+      else {
 
         instructions.innerHTML =
           "Scan this QR code with WhatsApp.";
@@ -971,7 +1061,9 @@ async function generateQRCode() {
       qrDisplay.style.display =
         "block";
 
-    } else {
+    }
+
+    else {
 
       codeDisplay.style.display =
         "flex";
@@ -985,13 +1077,15 @@ async function generateQRCode() {
 
     }
 
+  }
 
-  } catch (error) {
+  catch (error) {
 
     console.error(
       "QR ERROR:",
       error
     );
+
 
     codeDisplay.style.display =
       "flex";
@@ -1003,18 +1097,21 @@ async function generateQRCode() {
       </div>
     `;
 
-  } finally {
+  }
 
-    loading.style.display = "none";
+  finally {
+
+    loading.style.display =
+      "none";
 
   }
 
 }
 
 
-/* =========================
-   COPY
-========================= */
+/* ==========================================
+   COPY PAIR CODE
+========================================== */
 
 document
 .getElementById("copy")
@@ -1027,6 +1124,7 @@ document
       No Pair Code Available
     `;
 
+
     setTimeout(() => {
 
       this.innerHTML = `
@@ -1035,6 +1133,7 @@ document
       `;
 
     }, 1800);
+
 
     return;
   }
@@ -1062,8 +1161,9 @@ document
 
     }, 2000);
 
+  }
 
-  } catch (error) {
+  catch (error) {
 
     console.error(
       "COPY ERROR:",
