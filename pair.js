@@ -1,156 +1,98 @@
-import express from "express";
-import fs from "fs";
-import pino from "pino";
-import {
-    makeWASocket,
-    useMultiFileAuthState,
-    delay,
-    makeCacheableSignalKeyStore,
-    Browsers,
-    fetchLatestBaileysVersion,
-} from "@whiskeysockets/baileys";
-import pn from "awesome-phonenumber";
+import express from 'express';
+import bodyParser from 'body-parser';
+import path from 'path';
+import { fileURLToPath } from 'url';
 
-const router = express.Router();
+import qrRouter from './qr.js';
+import pairRouter from './pair.js';
 
-const BOT_NAME = "PUTTUS-BOT";
-const DEFAULT_NUMBER = "917679218662";
+const app = express();
 
-function removeFile(filePath) {
-    try {
-        if (!fs.existsSync(filePath)) return false;
-        fs.rmSync(filePath, { recursive: true, force: true });
-    } catch (e) {
-        console.error(`${BOT_NAME}: Error removing file:`, e);
-    }
-}
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
-router.get("/", async (req, res) => {
-    let num = req.query.number || DEFAULT_NUMBER;
-    let dirs = "./" + num;
+const PORT = process.env.PORT || 8000;
 
-    num = String(num).replace(/[^0-9]/g, "");
-
-    const phone = pn("+" + num);
-
-    if (!phone.isValid()) {
-        return res.status(400).send({
-            error: "Invalid phone number.",
-        });
-    }
-
-    num = phone.getNumber("e164").replace("+", "");
-
-    async function initiateSession() {
-        const { state, saveCreds } =
-            await useMultiFileAuthState(dirs);
-
-        try {
-            const { version } =
-                await fetchLatestBaileysVersion();
-
-            const PUTTUSBOT = makeWASocket({
-                version,
-                auth: {
-                    creds: state.creds,
-                    keys: makeCacheableSignalKeyStore(
-                        state.keys,
-                        pino({ level: "fatal" })
-                    ),
-                },
-                printQRInTerminal: false,
-                logger: pino({ level: "fatal" }),
-                browser: Browsers.windows("Chrome"),
-                markOnlineOnConnect: false,
-                generateHighQualityLinkPreview: false,
-                defaultQueryTimeoutMs: 60000,
-                connectTimeoutMs: 60000,
-                keepAliveIntervalMs: 30000,
-                retryRequestDelayMs: 250,
-                maxRetries: 5,
-            });
-
-            PUTTUSBOT.ev.on(
-                "creds.update",
-                saveCreds
-            );
-
-            PUTTUSBOT.ev.on(
-                "connection.update",
-                async (update) => {
-                    const {
-                        connection,
-                        lastDisconnect,
-                        isNewLogin,
-                        isOnline,
-                    } = update;
-
-                    if (connection === "open") {
-                        console.log(
-                            `✅ ${BOT_NAME} connected successfully!`
-                        );
-                    }
-
-                    if (isNewLogin) {
-                        console.log(
-                            `🔐 ${BOT_NAME}: New login`
-                        );
-                    }
-
-                    if (isOnline) {
-                        console.log(
-                            `📶 ${BOT_NAME}: Client is online`
-                        );
-                    }
-
-                    if (connection === "close") {
-                        const statusCode =
-                            lastDisconnect?.error
-                                ?.output?.statusCode;
-
-                        console.log(
-                            `🔌 ${BOT_NAME}: Connection closed`,
-                            statusCode || ""
-                        );
-                    }
-                }
-            );
-
-            if (!PUTTUSBOT.authState.creds.registered) {
-                await delay(3000);
-
-                const code =
-                    await PUTTUSBOT.requestPairingCode(num);
-
-                const formatted =
-                    code?.match(/.{1,4}/g)?.join("-") ||
-                    code;
-
-                if (!res.headersSent) {
-                    return res.send({
-                        bot: BOT_NAME,
-                        number: num,
-                        code: formatted,
-                    });
-                }
-            }
-
-        } catch (error) {
-            console.error(
-                `❌ ${BOT_NAME}:`,
-                error
-            );
-
-            if (!res.headersSent) {
-                return res.status(503).send({
-                    bot: BOT_NAME,
-                    error: "Service unavailable",
-                });
-            }
-        }
-    }
-
-    await initiateSession();
+// Increase EventEmitter listeners
+import('events').then((events) => {
+    events.EventEmitter.defaultMaxListeners = 500;
 });
 
-export default router;
+// Middleware
+app.use(bodyParser.json());
+app.use(bodyParser.urlencoded({ extended: true }));
+app.use(express.static(__dirname));
+
+// ===============================
+// API ROUTES
+// ===============================
+
+// QR API
+app.use('/qr', qrRouter);
+
+// Pairing Code API
+app.use('/code', pairRouter);
+
+// ===============================
+// WEB PAGES
+// ===============================
+
+// Pair Code Page
+app.get('/pair', (req, res) => {
+    res.sendFile(path.join(__dirname, 'pair.html'));
+});
+
+// QR Code Page
+app.get('/qrpage', (req, res) => {
+    res.sendFile(path.join(__dirname, 'qr.html'));
+});
+
+// Main Page
+app.get('/', (req, res) => {
+    res.sendFile(path.join(__dirname, 'main.html'));
+});
+
+// ===============================
+// 404 HANDLER
+// ===============================
+
+app.use((req, res) => {
+    res.status(404).send({
+        error: 'Page not found',
+    });
+});
+
+// ===============================
+// START SERVER
+// ===============================
+
+app.listen(PORT, () => {
+    console.log('================================');
+    console.log('        PUTTUS-BOT SERVER');
+    console.log('================================');
+    console.log(`YouTube: @puttus-das`);
+    console.log(`GitHub: @puttus-das`);
+    console.log(`Server running on port ${PORT}`);
+    console.log('================================');
+});
+
+export default app;
+
+তারপর "pair.html"-এ শুধু এই অংশটা বদলাবে
+
+পুরোনো:
+
+const response = await axios(
+    `/pair?number=${mobileNumber.replace(/[^0-9]/g, "")}`,
+);
+
+নতুন:
+
+const response = await axios(
+    `/code?number=${mobileNumber.replace(/[^0-9]/g, "")}`,
+);
+
+ব্যস। এরপর:
+
+"https://puttus-das.onrender.com/pair" → page খুলবে
+Generate Pair Code → "/code?number=..." → "pair.js" → pairing code return করবে।
