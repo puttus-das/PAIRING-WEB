@@ -21,21 +21,31 @@ app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(express.static(__dirname));
 
+// QR API
 app.use('/qr', qrRouter);
-app.use('/code', pairRouter);
 
-app.use('/pair', async (req, res) => {
+// Pairing API
+app.use('/pair', pairRouter);
+
+// Pair page
+app.get('/pairpage', (req, res) => {
     res.sendFile(path.join(__dirname, 'pair.html'));
 });
-app.use('/qrpage', (req, res) => {
+
+// QR page
+app.get('/qrpage', (req, res) => {
     res.sendFile(path.join(__dirname, 'qr.html'));
 });
-app.use('/', async (req, res) => {
+
+// Main page
+app.get('/', (req, res) => {
     res.sendFile(path.join(__dirname, 'main.html'));
 });
 
 app.listen(PORT, () => {
-    console.log(`YoutTube: @puttus-das\nGitHub: @puttus-das\nServer running on http://localhost:${PORT}`);
+    console.log(`YouTube: @puttus-das`);
+    console.log(`GitHub: @puttus-das`);
+    console.log(`Server running on port ${PORT}`);
 });
 
 export default app;
